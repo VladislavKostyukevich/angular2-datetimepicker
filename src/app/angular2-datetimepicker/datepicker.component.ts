@@ -46,6 +46,7 @@ export class DatePicker implements OnInit, ControlValueAccessor {
     toMonthDays: Array<any> = [];
     monthsView: boolean = false;
     today: Date = new Date();
+    error:boolean = false; 
 
     defaultSettings: Settings = {
         defaultOpen: false,
@@ -76,21 +77,47 @@ export class DatePicker implements OnInit, ControlValueAccessor {
     private onChangeCallback: (_: any) => {};
     writeValue(value: any) {
         if (value !== undefined && value !== null) {
-            if(!this.settings.rangepicker){
+            if (!this.settings.rangepicker) {
                 this.initDate(value);
                 this.monthDays = this.generateDays(this.date);
             }
-            else{
+            else {
                 this.initDateRange(value);
                 this.monthDays = this.generateDays(this.dateRange.startDate);
                 this.toMonthDays = this.generateDays(this.dateRange.endDate);
-                console.log(this.monthDays);
             }
-            
+
         }
         else {
             this.date = new Date();
         }
+    }
+    yearFitsLimit(year: number) {
+        let fitFrom = !this.settings.from || year >= +this.settings.from.getFullYear();
+        let fitTo = !this.settings.to || year <= +this.settings.to.getFullYear();
+        return fitFrom && fitTo
+    }
+    monthFitsLimit(month: number) {
+        if (this.yearFitsLimit(this.date.getFullYear())) {
+            let tryDate = this.date;
+            tryDate.setMonth(month);
+            tryDate.setDate(this.getMonthLength(month, this.date.getFullYear()));
+            let fitFrom = !this.settings.from || tryDate >= this.settings.from;
+            tryDate.setDate(1);
+            let fitTo = !this.settings.to || tryDate <= this.settings.to;
+            return fitFrom && fitTo
+        }
+        return false;
+    }
+    dayFitsLimit(day: number) {
+        if(this.yearFitsLimit(this.date.getFullYear()) && this.monthFitsLimit(this.date.getMonth())){
+            let tryDate = this.date;
+            tryDate.setDate(day);
+            let fitFrom = !this.settings.from || tryDate >= this.settings.from;
+            let fitTo = !this.settings.to || tryDate <= this.settings.to;
+            return fitFrom && fitTo
+        }
+        return false
     }
     registerOnChange(fn: any) {
         this.onChangeCallback = fn;
@@ -113,7 +140,7 @@ export class DatePicker implements OnInit, ControlValueAccessor {
         }
         this.minValue = this.date.getMinutes();
     }
-    initDateRange(val: DateRange){
+    initDateRange(val: DateRange) {
         this.dateRange.startDate = new Date(val.startDate);
         this.dateRange.endDate = new Date(val.endDate);
         if (this.dateRange.startDate.getHours() <= 11) {
@@ -170,7 +197,7 @@ export class DatePicker implements OnInit, ControlValueAccessor {
                     }
                     day++;
                 }
-                dateRow.push({day:dateCell, date: new Date((month+1)+'-'+dateCell+'-'+date.getFullYear())});
+                dateRow.push({ day: dateCell, date: new Date((month + 1) + '-' + dateCell + '-' + date.getFullYear()) });
             }
             // stop making rows if we've run out of days
             if (day > monthLength) {
@@ -250,93 +277,106 @@ export class DatePicker implements OnInit, ControlValueAccessor {
      * 
      */
 
-    rangeSelected : number = 0;
-    setDay(evt: any, type:string) {
-        if (evt.target.innerHTML) {
-            var selectedDay = new Date(evt.target.getAttribute('data-label'));
-            if(type == 'range'){
-                if(this.rangeSelected == 0){
-                    this.setStartDate(selectedDay);
+    rangeSelected: number = 0;
+    setDay(evt: any, type: string) {
+        let ddf = evt.target.getAttribute('data-label');
+        let selectedDay = new Date(ddf);
+        if(this.dayFitsLimit(selectedDay.getDate())){
+            if (evt.target.innerHTML) {
+                if (type == 'range') {
+                    if (this.rangeSelected == 0) {
+                        this.setStartDate(selectedDay);
+                    }
+                    else if (this.rangeSelected == 1) {
+                        this.setEndDate(selectedDay);
+                    }
                 }
-                else if(this.rangeSelected == 1){
-                    this.setEndDate(selectedDay);
+                /*            else if(type == 'range' && !this.rangeSelected){
+                                if(selectedDay < this.dateRange.startDate){
+                                    this.dateRange.endDate  = new Date(selectedDay);
+                                    this.dateRange.startDate = new Date(selectedDay);
+                                }
+                                else{
+                                    this.dateRange.endDate = new Date(selectedDay);
+                                this.rangeSelected = true;
+                                }
+                                this.rangeSelected = true;
+                
+                            }*/
+                else {
+                    this.date = new Date(selectedDay);
+                    this.onChangeCallback(this.date.toString());
+    
+                }
+                if (this.settings.closeOnSelect) {
+                    this.popover = false;
+                    this.onDateSelect.emit(this.date);
                 }
             }
-/*            else if(type == 'range' && !this.rangeSelected){
-                if(selectedDay < this.dateRange.startDate){
-                    this.dateRange.endDate  = new Date(selectedDay);
-                    this.dateRange.startDate = new Date(selectedDay);
-                }
-                else{
-                    this.dateRange.endDate = new Date(selectedDay);
-                this.rangeSelected = true;
-                }
-                this.rangeSelected = true;
-
-            }*/
-            else {
-                this.date = new Date(selectedDay);
-                this.onChangeCallback(this.date.toString());
-
-            }
-            if (this.settings.closeOnSelect) {
-                this.popover = false;
-                this.onDateSelect.emit(this.date);
-            }
+        }else{
+            this.error = true;
         }
     }
-    setStartDate(selectedDate:Date){
-        if(selectedDate < this.dateRange.endDate){
+    setStartDate(selectedDate: Date) {
+        if (selectedDate < this.dateRange.endDate) {
             this.dateRange.startDate = new Date(selectedDate);
         }
-        else if(selectedDate > this.dateRange.endDate){
+        else if (selectedDate > this.dateRange.endDate) {
             this.dateRange.startDate = new Date(selectedDate);
-            this.dateRange.endDate  = new Date(selectedDate);
+            this.dateRange.endDate = new Date(selectedDate);
         }
         this.rangeSelected = 1;
     }
-    setEndDate(selectedDate:Date){
-        if(selectedDate > this.dateRange.startDate && (this.dateRange.startDate != this.dateRange.endDate )){
-            this.dateRange.endDate  = new Date(selectedDate);
+    setEndDate(selectedDate: Date) {
+        if (selectedDate > this.dateRange.startDate && (this.dateRange.startDate != this.dateRange.endDate)) {
+            this.dateRange.endDate = new Date(selectedDate);
         }
-        else if(selectedDate > this.dateRange.startDate && (this.dateRange.startDate == this.dateRange.endDate )){
-            this.dateRange.endDate  = new Date(selectedDate);
+        else if (selectedDate > this.dateRange.startDate && (this.dateRange.startDate == this.dateRange.endDate)) {
+            this.dateRange.endDate = new Date(selectedDate);
         }
-        else if(selectedDate < this.dateRange.startDate && (this.dateRange.startDate != this.dateRange.endDate )){
+        else if (selectedDate < this.dateRange.startDate && (this.dateRange.startDate != this.dateRange.endDate)) {
             this.dateRange.startDate = new Date(selectedDate);
-            this.dateRange.endDate  = new Date(selectedDate);
+            this.dateRange.endDate = new Date(selectedDate);
         }
-        else if(selectedDate < this.dateRange.startDate && (this.dateRange.startDate == this.dateRange.endDate )){
+        else if (selectedDate < this.dateRange.startDate && (this.dateRange.startDate == this.dateRange.endDate)) {
             this.dateRange.startDate = new Date(selectedDate);
-            this.dateRange.endDate  = new Date(selectedDate);
+            this.dateRange.endDate = new Date(selectedDate);
         }
-        else if(selectedDate.getTime() == this.dateRange.startDate.getTime()){
+        else if (selectedDate.getTime() == this.dateRange.startDate.getTime()) {
             this.dateRange.startDate = new Date(selectedDate);
-            this.dateRange.endDate  = new Date(selectedDate);
+            this.dateRange.endDate = new Date(selectedDate);
         }
         this.rangeSelected = 0;
     }
-    highlightRange(date: Date){
+    highlightRange(date: Date) {
         return (date > this.dateRange.startDate && date < this.dateRange.endDate);
     }
     setYear(evt: any) {
-        console.log(evt.target);
-        var selectedYear = parseInt(evt.target.getAttribute('id'));
-        this.date = new Date(this.date.setFullYear(selectedYear));
-        this.yearView = !this.yearView;
-        this.monthDays = this.generateDays(this.date);
+        if (this.yearFitsLimit(+evt.target.getAttribute('id'))) {
+            var selectedYear = parseInt(evt.target.getAttribute('id'));
+            this.date = new Date(this.date.setFullYear(selectedYear));
+            this.yearView = !this.yearView;
+            this.monthDays = this.generateDays(this.date);
+        }else{
+            this.error = true;
+        }
     }
     setMonth(evt: any) {
         if (evt.target.getAttribute('id')) {
             var selectedMonth = this.settings.cal_months_labels_short.indexOf(evt.target.getAttribute('id'));
-            this.date = new Date(this.date.setMonth(selectedMonth));
-            this.monthsView = !this.monthsView;
-            this.monthDays = this.generateDays(this.date);
+            if (this.monthFitsLimit(selectedMonth)) {
+                this.date = new Date(this.date.setMonth(selectedMonth));
+                this.monthsView = !this.monthsView;
+                this.monthDays = this.generateDays(this.date);
+            }
+        }else{
+            this.error = true;
         }
     }
     prevMonth(e: any) {
         e.stopPropagation();
         var self = this;
+        let prevDate = new Date(this.date);
         if (this.date.getMonth() == 0) {
             this.date.setMonth(11);
             this.date.setFullYear(this.date.getFullYear() - 1);
@@ -348,11 +388,17 @@ export class DatePicker implements OnInit, ControlValueAccessor {
             }
             this.date.setMonth(this.date.getMonth() - 1);
         }
-        this.date = new Date(this.date);
-        this.monthDays = this.generateDays(this.date);
+        if(this.monthFitsLimit(this.date.getMonth())){
+            this.date = new Date(this.date);
+            this.monthDays = this.generateDays(this.date);
+        }else{
+            this.error = true;
+            this.date = new Date(prevDate);
+        }
     }
     nextMonth(e: any) {
         e.stopPropagation();
+        let prevDate = new Date(this.date);
         var self = this;
         if (this.date.getMonth() == 11) {
             this.date.setMonth(0);
@@ -364,10 +410,14 @@ export class DatePicker implements OnInit, ControlValueAccessor {
                 this.date.setDate(nextmonthLength);
             }
             this.date.setMonth(this.date.getMonth() + 1);
-
         }
-        this.date = new Date(this.date);
-        this.monthDays = this.generateDays(this.date);
+        if(this.monthFitsLimit(this.date.getMonth())){
+            this.date = new Date(this.date);
+            this.monthDays = this.generateDays(this.date);
+        }else{
+            this.error = true;
+            this.date = new Date(prevDate);
+        }
     }
     onChange(evt: any) {
         console.log(evt);
@@ -401,19 +451,22 @@ export class DatePicker implements OnInit, ControlValueAccessor {
         this.popover = false;
         this.onDateSelect.emit(this.date);
     }
-    togglePopover(){
-        if(this.popover){
+    togglePopover() {
+        if (this.popover) {
             this.closepopover();
         }
         else {
             this.popover = true;
         }
     }
-    closepopover() {
-        this.rangeSelected = 0;
-        this.popover = false;
+    closepopover(close: boolean = true) {
+        if (close) {
+            this.rangeSelected = 0;
+            this.popover = false;
+            this.error = false;
+        }
     }
-    composeDate(date: Date){
-        return (date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
+    composeDate(date: Date) {
+        return (date.getMonth() + 1) + '-' + date.getDate() + '-' + date.getFullYear();
     }
 }

@@ -1,5 +1,7 @@
 export interface Settings{
     bigBanner?: Boolean;
+    from?:Date;
+    to?:Date;
     timePicker: Boolean;
     format: string;
     defaultOpen?: Boolean;

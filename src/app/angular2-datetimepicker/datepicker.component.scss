@@ -17,6 +17,7 @@ body{
 }
 .year-dropdown{
     text-align: center;
+    position: relative;
 }
 .calendar-header{
     color: #333;
@@ -324,6 +325,23 @@ body{
     border-top: 1px solid #d1d1d1;
     text-align: center;
 }
+.cal-util > .error{
+    width: 100%;
+    padding: 5px;
+    border-bottom: 1px solid #d1d1d1;
+    float: left;
+    color: red;
+    font-size: 13px;
+    border-top: 1px solid #d1d1d1;
+    text-align: center;
+}
+.cal-overlay{
+    height: 100%;
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+}
 .ok > i{
     margin-right: 5px;
 }
@@ -341,6 +359,7 @@ body{
 	border: 1px solid $base-color;
     background: none;
 }
+
 .selected-day > span{
 	/*background: #3ce5ed;*/
     background: $base-color;
@@ -444,45 +463,44 @@ body{
     cursor:pointer;
     font-size: 10px;
 }
-
-    .timepicker-true .wc-month-row{
-        font-size: 28px;
-        padding: 5px 0px 5px 15px;
-    }
-    .timepicker-true .wc-month-row > div:nth-child(1), .wc-year-row > div:nth-child(1){
-    }
-    .timepicker-true .wc-month-row > i, .wc-year-row > i{
-        padding: 8px 6px;
-    }
-    .timepicker-true .wc-my-sec{
-        padding: 16px 2px;
-    }
-    .timepicker-true .wc-time-sec{
-        width: 48%;
-        padding: 25px 0px;
-        margin: 0px;
-        cursor: pointer;
-    }
-    .timepicker-true .wc-time-sec:hover{
-        color: rgba(255, 255, 255, 0.65);
-    }
-    .timepicker-true .wc-time-sec > .time{
-        width: 75%;
-        cursor: pointer;
-    }
-    .timepicker-true .time i{
-        display: none;
-    }
-    .timepicker-true .time-divider{
-        padding: 0px;
-    }
-    .timepicker-true .timestate{
-        padding: 0px;
-        width: auto;
-        padding-top: 7px;
-        font-size: 20px;
-        font-weight: 300;
-    }
+.timepicker-true .wc-month-row{
+    font-size: 28px;
+    padding: 5px 0px 5px 15px;
+}
+.timepicker-true .wc-month-row > div:nth-child(1), .wc-year-row > div:nth-child(1){
+}
+.timepicker-true .wc-month-row > i, .wc-year-row > i{
+    padding: 8px 6px;
+}
+.timepicker-true .wc-my-sec{
+    padding: 16px 2px;
+}
+.timepicker-true .wc-time-sec{
+    width: 48%;
+    padding: 25px 0px;
+    margin: 0px;
+    cursor: pointer;
+}
+.timepicker-true .wc-time-sec:hover{
+    color: rgba(255, 255, 255, 0.65);
+}
+.timepicker-true .wc-time-sec > .time{
+    width: 75%;
+    cursor: pointer;
+}
+.timepicker-true .time i{
+    display: none;
+}
+.timepicker-true .time-divider{
+    padding: 0px;
+}
+.timepicker-true .timestate{
+    padding: 0px;
+    width: auto;
+    padding-top: 7px;
+    font-size: 20px;
+    font-weight: 300;
+}
 .year-title{
     width: 35%;
     float: left;

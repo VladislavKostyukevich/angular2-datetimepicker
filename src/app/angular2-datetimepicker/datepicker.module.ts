@@ -8,6 +8,4 @@ import { ClickOutsideDirective } from './clickOutside';
     declarations: [DatePicker, ClickOutsideDirective],
     exports: [DatePicker,FormsModule, ClickOutsideDirective]
 })
-export class AngularDateTimePickerModule{
-
-}
+export class AngularDateTimePickerModule{ }
