@@ -9,7 +9,7 @@ import 'rxjs/add/operator/do';
 })
 export class ClickOutsideDirective {
     private listening: boolean;
-    private globalClick;
+    private globalClick: any;
 
     @Output('clickOutside') clickOutside: EventEmitter<Object>;
 
@@ -49,7 +49,7 @@ export class ClickOutsideDirective {
         }
     }
 
-    isDescendant(parent, child) {
+    isDescendant(parent: any, child: any) {
         let node = child;
         while (node !== null) {
             if (node === parent) {

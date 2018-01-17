@@ -309,7 +309,7 @@ export class DatePicker implements OnInit, ControlValueAccessor {
     
                 }
                 if (this.settings.closeOnSelect) {
-                    this.popover = false;
+                    this.closepopover()
                     this.onDateSelect.emit(this.date);
                 }
             }

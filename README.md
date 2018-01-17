@@ -6,16 +6,16 @@
 ### Overview 
 
 Angular 2 DateTimepicker is a cool responsive DateTimepicker component for Web and Mobile. It is Mobile friendly and light weight. Developed by [Cuppa Labs](http://www.cuppalabs.com).
+Upgraded by VK.
 
 ### Getting Started
 To get started with using the multiselect dropdown component, follow the below steps. It’s easy to integrate and just a matter of minutes.
 
 ### Installation
-- The datetimepicker package is published on the [npm](https://www.npmjs.com/package/angular2-datetimepicker) Registry. 
 -  Install the package with [npm](https://www.npmjs.com): 
 
 ```js
-	npm install angular2-datetimepicker
+	npm i vk-custom-angular2-datetimepicker --save
 ```
 
 ### Usage
@@ -76,6 +76,8 @@ Following `settings` object properties can be used to configure the component.
 |defaultOpen|Boolean|false|To open the datepicker popover on load. Default is set to false.|
 |timePicker|Boolean|false|Enable time picker feature.|
 |closeOnSelect|Boolean|true|to close the popover on date select or on click of done button.|
+|from|Date|null|to allow only dates from.|
+|to|Date|null|to allow only dates to.|
 
 
 ## Callback Methods
